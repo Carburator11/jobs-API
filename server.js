@@ -42,7 +42,8 @@ app.get('/view', (req, res)=>{
 });
 
 app.post('newcompany', (req, res)=>{
-
+    console.log('POST - create company: ' +JSON.stringify(req.body.company)   );
+    res.redirect(303, '/view')
 })
 
 
