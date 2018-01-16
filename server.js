@@ -30,17 +30,19 @@ app.set('port', (process.env.PORT || 5000));
 
 var test = {test: "glutt"}
 
-
-app.get('/view', (req, res)=>{
+// Main interface with optionnal 'msg' param (duplicate error, void name, ...)
+app.get('/view/:msg?', (req, res)=>{
+    if(req.params.msg){console.log(req.params.msg)}
     MongoClient.connect(connect.uri, (err, db) => {
         console.log("Connecting");
         assert.equal(null, err);
         db.collection('jobs.company').find().toArray(  (err, data) =>  {
-            res.render('front.ejs', {jobs : data, test: test });
+            res.render('front.ejs', {jobs : data, test: test, msg: req.params.msg });
         }  );
     });
 });
 
+// A raw view of the DB
 app.get('/raw', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
         console.log("Connecting");
@@ -51,20 +53,39 @@ app.get('/raw', (req, res)=>{
     });
 });
 
+// Create new company
 app.post('/newcompany', (req, res)=>{
-    MongoClient.connect(connect.uri, (err, db) => {
-        var company = req.body.company;
-        var check = db.collection('jobs.company').find({'name': req.body.company }).toArray(function (err, items) {
-            console.log('CREATE - ' + JSON.stringify(company)   );
-            console.log("Check - " + JSON.stringify(items) );
-            if(!items[0]){console.log("Check = empty")}
-            //db.collection('jobs.company').insert({ 'name': req.body.company, jobs: {} });
-            
-            res.redirect(303, '/view');
+    console.log('CREATE attempt - ' + JSON.stringify(req.body.company)   );
+
+    // Error 50 : void company name provided
+    if(req.body.company === ''){
+        console.log("Error 50 : void company name provided")
+        res.redirect(303, '/view/err50');   
+    }
+    
+    else{
+        MongoClient.connect(connect.uri, (err, db) => {
+            db.collection('jobs.company').find({'name': req.body.company }).toArray(function (err, items) {
+                
+                // Check if company exists already
+                if(!items[0]){ 
+                    console.log("CREATE completed - " + JSON.stringify(req.body.company)  )
+                    db.collection('jobs.company').insert({ 'name': req.body.company, jobs: {} });
+                    res.redirect(303, '/view/newCompAdded');
+                    }
+                
+                else{ 
+                    // Error 80 : duplicate
+                    console.log("Error 80: company already exists");
+                    res.redirect(303, '/view/err80');
+                    }
+                
+            });
         });
-    });
+    }
 });
 
+// Create new job
 app.post('/newjob', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
         var newjob = req.body;
@@ -79,24 +100,19 @@ app.post('/newjob', (req, res)=>{
 });
 
 // This should be a DELETE request, but easier to test with GET..
-// Note: always add ObjectId in the deleteOne filter
 app.get('/del:id', (req, res)=>{
     console.log("DELETE "+ req.params.id);
     MongoClient.connect(connect.uri, (err, db) => {
+        // Note: always add ObjectId in the deleteOne filter
         db.collection('jobs.company').deleteOne({"_id" : ObjectId(req.params.id) });
     })
-
     res.redirect(303, '/view');
-
-
-
 });
 
 
 
 app.listen(app.get('port'), () => {
 	console.log('We are live on port: '+ app.get('port'));
-
 });
 
-//
+// End of app

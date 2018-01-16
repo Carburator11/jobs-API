@@ -29,8 +29,20 @@
         <h3>New company</h3>
 
         <form action="/newcompany" method="POST">
-          <input type="text" name="company" value="company" >
+          <input type="text" name="company" placeholder="company" >
           <input type="submit" value="Add">
+          <% if(msg === "err80"){ %>
+            <div class="errorMsg">This company already exists </div>
+            <% } %>
+            <% if(msg === "err50"){ %>
+              <div class="errorMsg">Please enter a valid name </div>
+              <% } %>
+              <% if(msg === "newCompAdded"){ %>
+                <div class="okMsg">Company created </div>
+                <% } %>
+              
+
+
         </form>
 
         <h3>New job entry</h3>
@@ -69,6 +81,47 @@
     overflow: scroll;
     height: 200px;
   }
+
+  .errorMsg{
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+
+    animation: fade 0.5s 1;
+    -webkit-animation: fade 0.5s 1;
+    animation-fill-mode: forwards;
+
+    animation-delay:6s;
+    -webkit-animation-delay:1s; /* Safari and Chrome */
+    -webkit-animation-fill-mode: forwards;
+
+}
+.okMsg{
+    color: green;
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+
+    animation: fade 0.5s 1;
+    -webkit-animation: fade 0.5s 1;
+    animation-fill-mode: forwards;
+
+    animation-delay:6s;
+    -webkit-animation-delay:1s; /* Safari and Chrome */
+    -webkit-animation-fill-mode: forwards;
+}
+
+@keyframes  fade{
+    from {opacity :1;}
+    to {opacity :0;}
+}
+
+@-webkit-keyframes  fade{
+    from {opacity :1;}
+    to {opacity :0;}
+}
+
 
 </style>
 
