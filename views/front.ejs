@@ -10,28 +10,71 @@
         
         </head>
         <h1>Jobs DB</h1>
+
+        <h3>Full DB</h3>
         <div id= "jobsDB">
-        Jobs.company :    <%-   JSON.stringify(jobs)   %><br><br>
-        Test : <%-   JSON.stringify(test)   %>
+ 
+        <% jobs.forEach( (elem) => { %>
+          <% if(elem.name){ %>  
+            <div><%- JSON.stringify(elem.name)%> : <%- JSON.stringify(elem.jobs) %>
+            [<a href= "del<%- elem._id %>" >x</a>]
+            </div>
+            <% }  %>
+          
+        <% }) %>
+        
+
         </div>
 
-        <h3>Companies</h3>
+        <h3>New company</h3>
 
         <form action="/newcompany" method="POST">
           <input type="text" name="company" value="company" >
           <input type="submit" value="Add">
         </form>
 
-        <h3>Create new job entry</h3>
+        <h3>New job entry</h3>
 
 
-        <form action="/createjob" method="POST">
-            
+        <form action="/newjob" method="POST">
+            <select name="company" id="company">
+                <option value="aa" selected></option>
+                
+                <% jobs.forEach( (job) => { %>
+                  <% if(job.name){ %>  
+                    <option value = <%- JSON.stringify(job.name) %> >
+                        <%- JSON.stringify(job.name) %>
+                    </option>              
+                    <% }  %>
+                  
+                <% }) %>
+                
+            </select>
             <input type="text" name="jobName" value="job name" >
             <input type="text" name="salary"  value="Salary" >
             <input type="text" name="experience" value= "experience level" >
             <input type="submit" value="Insert">
         
         </form>
+        <br><br>
+        <br><br>
+        <br><br>
+        <br><br>
+        <br><br>
+        End
+
+<style>
+  #jobsDB {
+    border: 1px solid green;
+    overflow: scroll;
+    height: 200px;
+  }
+
+</style>
+
+<script>
+
+    
 
 
+</script>

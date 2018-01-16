@@ -41,12 +41,56 @@ app.get('/view', (req, res)=>{
     });
 });
 
-app.post('newcompany', (req, res)=>{
-    console.log('POST - create company: ' +JSON.stringify(req.body.company)   );
-    res.redirect(303, '/view')
-})
+app.get('/raw', (req, res)=>{
+    MongoClient.connect(connect.uri, (err, db) => {
+        console.log("Connecting");
+        assert.equal(null, err);
+        db.collection('jobs.company').find().toArray(  (err, data) =>  {
+            res.json(data);
+        });
+    });
+});
+
+app.post('/newcompany', (req, res)=>{
+    MongoClient.connect(connect.uri, (err, db) => {
+        var company = req.body.company;
+        var check = db.collection('jobs.company').find({'name': req.body.company }).toArray(function (err, items) {
+            console.log('CREATE - ' + JSON.stringify(company)   );
+            console.log("Check - " + JSON.stringify(items) );
+            if(!items[0]){console.log("Check = empty")}
+            //db.collection('jobs.company').insert({ 'name': req.body.company, jobs: {} });
+            
+            res.redirect(303, '/view');
+        });
+    });
+});
+
+app.post('/newjob', (req, res)=>{
+    MongoClient.connect(connect.uri, (err, db) => {
+        var newjob = req.body;
+        db.collection('jobs.company').insert({ name: newjob.company, jobs: {
+            position :newjob.jobName,
+            salary: newjob.salary,
+            experience: newjob.experience}
+        });
+        console.log('CREATE - ' +JSON.stringify(newjob)   );
+        res.redirect(303, '/view');
+    });
+});
+
+// This should be a DELETE request, but easier to test with GET..
+// Note: always add ObjectId in the deleteOne filter
+app.get('/del:id', (req, res)=>{
+    console.log("DELETE "+ req.params.id);
+    MongoClient.connect(connect.uri, (err, db) => {
+        db.collection('jobs.company').deleteOne({"_id" : ObjectId(req.params.id) });
+    })
+
+    res.redirect(303, '/view');
 
 
+
+});
 
 
 
