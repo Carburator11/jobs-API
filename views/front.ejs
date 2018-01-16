@@ -17,7 +17,7 @@
         <% jobs.forEach( (elem) => { %>
           <% if(elem.name){ %>  
             <div><%- JSON.stringify(elem.name)%> : <%- JSON.stringify(elem.jobs) %>
-            [<a href= "del<%- elem._id %>" >x</a>]
+            [<a href= "del/<%- elem._id %>" >x</a>]
             </div>
             <% }  %>
           

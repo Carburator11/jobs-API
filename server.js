@@ -26,22 +26,6 @@ app.use(function(req, res, next) {
 app.set('port', (process.env.PORT || 5000));
 
 
-
-
-var test = {test: "glutt"}
-
-// Main interface with optionnal 'msg' param (duplicate error, void name, ...)
-app.get('/view/:msg?', (req, res)=>{
-    if(req.params.msg){console.log(req.params.msg)}
-    MongoClient.connect(connect.uri, (err, db) => {
-        console.log("Connecting");
-        assert.equal(null, err);
-        db.collection('jobs.company').find().toArray(  (err, data) =>  {
-            res.render('front.ejs', {jobs : data, test: test, msg: req.params.msg });
-        }  );
-    });
-});
-
 // A raw view of the DB
 app.get('/raw', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
@@ -53,6 +37,24 @@ app.get('/raw', (req, res)=>{
     });
 });
 
+
+
+var test = {test: "glutt"}
+
+// Main interface with optionnal 'msg' param (duplicate error, void name, ...)
+app.get('/:msg?', (req, res)=>{
+    if(req.params.msg){console.log(req.params.msg)}
+    MongoClient.connect(connect.uri, (err, db) => {
+        console.log("Connecting");
+        assert.equal(null, err);
+        db.collection('jobs.company').find().toArray(  (err, data) =>  {
+            res.render('front.ejs', {jobs : data, test: test, msg: req.params.msg });
+        }  );
+    });
+});
+
+
+
 // Create new company
 app.post('/newcompany', (req, res)=>{
     console.log('CREATE attempt - ' + JSON.stringify(req.body.company)   );
@@ -60,7 +62,7 @@ app.post('/newcompany', (req, res)=>{
     // Error 50 : void company name provided
     if(req.body.company === ''){
         console.log("Error 50 : void company name provided")
-        res.redirect(303, '/view/err50');   
+        res.redirect(303, '/err50');   
     }
     
     else{
@@ -71,13 +73,13 @@ app.post('/newcompany', (req, res)=>{
                 if(!items[0]){ 
                     console.log("CREATE completed - " + JSON.stringify(req.body.company)  )
                     db.collection('jobs.company').insert({ 'name': req.body.company, jobs: {} });
-                    res.redirect(303, '/view/newCompAdded');
+                    res.redirect(303, '/newCompAdded');
                     }
                 
                 else{ 
                     // Error 80 : duplicate
                     console.log("Error 80: company already exists");
-                    res.redirect(303, '/view/err80');
+                    res.redirect(303, '/err80');
                     }
                 
             });
@@ -95,18 +97,18 @@ app.post('/newjob', (req, res)=>{
             experience: newjob.experience}
         });
         console.log('CREATE - ' +JSON.stringify(newjob)   );
-        res.redirect(303, '/view');
+        res.redirect(303, '/');
     });
 });
 
 // This should be a DELETE request, but easier to test with GET..
-app.get('/del:id', (req, res)=>{
+app.get('/del/:id', (req, res)=>{
     console.log("DELETE "+ req.params.id);
     MongoClient.connect(connect.uri, (err, db) => {
         // Note: always add ObjectId in the deleteOne filter
         db.collection('jobs.company').deleteOne({"_id" : ObjectId(req.params.id) });
     })
-    res.redirect(303, '/view');
+    res.redirect(303, '/');
 });
 
 
