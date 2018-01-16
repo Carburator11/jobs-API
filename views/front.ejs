@@ -22,14 +22,54 @@
             <% }  %>
           
         <% }) %>
-        
+        </div>
+
+        <div id="filtersDB">
+            <form>
+                <b> Company </b>  <br>
+                  <select name="company" id="company" multiple>
+                      <option value="null" selected hidden disabled >Add filter</option>
+                    <option value="">comp 1</option>
+                    <option value="">comp 1</option>
+                    <option value="">comp 1</option>
+                    <option value="">comp 1</option>
+                    <option value="">comp 1</option>
+                    <option value="">comp 1</option>
+                  </select><br><br>
+                
+
+                <b>Experience</b><br>
+                  <input type="checkbox" name="junior" value="junior">
+                  <label for="junior">Junior</label><br>
+                  <input type="checkbox" name="confirmed" value="confirmed">
+                  <label for="confirmed">Confirmed</label><br>
+                  <input type="checkbox" name="senior" value="senior">
+                  <label for="senior">Senior</label><br>
+                  <input type="checkbox" name="overlord" value="overlord">
+                  <label for="overlord">Overlord</label><br><br>
+                
+
+                <b>Salary</b><br>
+                <input type="checkbox" name="sal0" value="sal0">
+                <label for="sal0"> < 30 </label><br>
+                <input type="checkbox" name="sal1" value="sal1">
+                <label for="sal1"> 30 - 45 </label><br>
+                <input type="checkbox" name="sal2" value="sal2">
+                <label for="sal2"> 45 - 65 </label><br>
+                <input type="checkbox" name="sal3" value="sal3">
+                <label for="sal3"> > 70</label><br><br>
+                <div>
+                  <button type="submit">Filter</button>
+                </div>
+              </form>
+
 
         </div>
 
         <h3>New company</h3>
 
         <form action="/newcompany" method="POST">
-          <input type="text" name="company" placeholder="company" >
+          <input type="text" name="company" placeholder="Company name" >
           <input type="submit" value="Add">
           <% if(msg === "err80"){ %>
             <div class="errorMsg">This company already exists </div>
@@ -50,7 +90,7 @@
 
         <form action="/newjob" method="POST">
             <select name="company" id="company">
-                <option value="aa" selected></option>
+                <option value="aa" selected hidden disabled >Select company</option>
                 
                 <% jobs.forEach( (job) => { %>
                   <% if(job.name){ %>  
@@ -62,9 +102,16 @@
                 <% }) %>
                 
             </select>
-            <input type="text" name="jobName" value="job name" >
-            <input type="text" name="salary"  value="Salary" >
-            <input type="text" name="experience" value= "experience level" >
+            <input type="text" name="jobName" placeholder="Job name" >
+            <input type="text" name="salary"  placeholder="Salary" >
+            <select name="experience">
+              <option value="aa" selected hidden disabled >Experience level</option>
+              <option value="junior">Junior (0-2)</option>
+              <option value="confirmed">Confirmed(2-5)</option>
+              <option value="senior">Senior (>5)</option>
+              <option value="overlord">Overlord (>10>)</option>
+
+            </select> 
             <input type="submit" value="Insert">
         
         </form>
@@ -77,10 +124,28 @@
 
 <style>
   #jobsDB {
+    vertical-align: top;
     border: 1px solid green;
-    overflow: scroll;
-    height: 200px;
+    overflow-Y: scroll;
+    height: 400px;
+    width: 75%;
+    display: inline-block;
+    padding: 5px;
   }
+
+  #filtersDB{
+    vertical-align: top;
+    border: 1px solid green;
+    height: 400px;
+    width: 15%;
+    display: inline-block;
+    margin-left: 10px;
+    padding: 5px 20px;
+  }
+
+  select{padding: 2px;}
+  option{margin: 2px}
+
 
   .errorMsg{
     color: red;
