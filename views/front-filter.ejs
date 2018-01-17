@@ -25,7 +25,7 @@
                     <%- JSON.stringify(el.position).replace(/"/g, '') %>
                     (<%- JSON.stringify(el.experience).replace(/"/g, '') %>), 
                     salary: <%- JSON.stringify(el.salary).replace(/"/g, '') %> k€
-                    [<a href= "#" onclick="alert('Fonction à implémenter :/')">x</a>]
+                    [<a href= "job-<%- el._id %>" </a>link</a>]
                   </div>
               <% })  %>
 
