@@ -37,18 +37,27 @@ app.get('/raw', (req, res)=>{
     });
 });
 
+// Job view
+app.get('/job-:id', (req, res)=>{
+    res.send("Job #" + req.params.id);
+})
+
+// Filtered view
+app.post('/filter-view', (req, res)=>{
+
+    
+    res.send(req.body);
+})
 
 
-var test = {test: "glutt"}
-
-// Main interface with optionnal 'msg' param (duplicate error, void name, ...)
+// Main view    [optional 'msg' param (duplicate error, void name, ...)]
 app.get('/:msg?', (req, res)=>{
     if(req.params.msg){console.log(req.params.msg)}
     MongoClient.connect(connect.uri, (err, db) => {
         console.log("Connecting");
         assert.equal(null, err);
         db.collection('jobs.company').find().toArray(  (err, data) =>  {
-            res.render('front.ejs', {jobs : data, test: test, msg: req.params.msg });
+            res.render('front.ejs', {jobs : data, test: {this: "is a test"}, msg: req.params.msg });
         }  );
     });
 });
@@ -72,7 +81,7 @@ app.post('/newcompany', (req, res)=>{
                 // Check if company exists already
                 if(!items[0]){ 
                     console.log("CREATE completed - " + JSON.stringify(req.body.company)  )
-                    db.collection('jobs.company').insert({ 'name': req.body.company, jobs: {} });
+                    db.collection('jobs.company').insert({ name: req.body.company, jobs: [] });
                     res.redirect(303, '/newCompAdded');
                     }
                 
@@ -90,16 +99,22 @@ app.post('/newcompany', (req, res)=>{
 // Create new job
 app.post('/newjob', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
-        var newjob = req.body;
-        db.collection('jobs.company').insert({ name: newjob.company, jobs: {
-            position :newjob.jobName,
-            salary: newjob.salary,
-            experience: newjob.experience}
+
+        db.collection('jobs.company').update({ name: req.body.company}, {$push: {jobs: {
+            position :  req.body.jobName,
+            salary:     req.body.salary,
+            experience: req.body.experience}
+            }
         });
-        console.log('CREATE - ' +JSON.stringify(newjob)   );
+        console.log('CREATE - ' +JSON.stringify(req.body)   );
         res.redirect(303, '/');
     });
 });
+
+
+
+
+
 
 // This should be a DELETE request, but easier to test with GET..
 app.get('/del/:id', (req, res)=>{

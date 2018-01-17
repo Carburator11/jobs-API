@@ -25,9 +25,10 @@
         </div>
 
         <div id="filtersDB">
-            <form>
+            <form method="POST" action="/filter-view">
                 <b> Company </b>  <br>
-                  <select name="company" id="company" multiple>
+                  <!-- Filter 0 (company)  -->
+                  <select name="f0" id="company" multiple>
                       <option value="null" selected hidden disabled >Add filter</option>
                     <option value="">comp 1</option>
                     <option value="">comp 1</option>
@@ -39,7 +40,8 @@
                 
 
                 <b>Experience</b><br>
-                  <input type="checkbox" name="junior" value="junior">
+                  <!-- Filter 1 (exp)  -->
+                  <input type="checkbox" name="f1" value="junior">
                   <label for="junior">Junior</label><br>
                   <input type="checkbox" name="confirmed" value="confirmed">
                   <label for="confirmed">Confirmed</label><br>
@@ -50,13 +52,14 @@
                 
 
                 <b>Salary</b><br>
-                <input type="checkbox" name="sal0" value="sal0">
+                <!-- Filter 2 (salary)  -->
+                <input type="checkbox" name="f2" value="sal0">
                 <label for="sal0"> < 30 </label><br>
-                <input type="checkbox" name="sal1" value="sal1">
+                <input type="checkbox" name="f2" value="sal1">
                 <label for="sal1"> 30 - 45 </label><br>
-                <input type="checkbox" name="sal2" value="sal2">
+                <input type="checkbox" name="f2" value="sal2">
                 <label for="sal2"> 45 - 65 </label><br>
-                <input type="checkbox" name="sal3" value="sal3">
+                <input type="checkbox" name="f2" value="sal3">
                 <label for="sal3"> > 70</label><br><br>
                 <div>
                   <button type="submit">Filter</button>
@@ -91,7 +94,7 @@
         <form action="/newjob" method="POST">
             <select name="company" id="company">
                 <option value="aa" selected hidden disabled >Select company</option>
-                
+                <option value="test">Test</option>
                 <% jobs.forEach( (job) => { %>
                   <% if(job.name){ %>  
                     <option value = <%- JSON.stringify(job.name) %> >
@@ -107,9 +110,9 @@
             <select name="experience">
               <option value="aa" selected hidden disabled >Experience level</option>
               <option value="junior">Junior (0-2)</option>
-              <option value="confirmed">Confirmed(2-5)</option>
+              <option value="confirmed">Confirmed (2-5)</option>
               <option value="senior">Senior (>5)</option>
-              <option value="overlord">Overlord (>10>)</option>
+              <option value="overlord">Overlord (>10></option>
 
             </select> 
             <input type="submit" value="Insert">
