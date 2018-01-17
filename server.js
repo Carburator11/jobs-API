@@ -11,6 +11,7 @@ var connect = require('./connect/connect.js');
 var assert = require('assert');
 var util = require('util');
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors({ origin: 'null', credentials: true }));
@@ -37,20 +38,48 @@ app.get('/raw', (req, res)=>{
     });
 });
 
+
+// FILTERED VIEW
+app.post('/filter-view', (req, res)=>{
+    MongoClient.connect(connect.uri, (err, db) => {
+        console.log("Connecting");
+        assert.equal(null, err);
+        db.collection('jobs.company').find({name: req.body.f0}).toArray(  (err, data) =>  {            
+            res.render('front-filter.ejs', {jobs : data });
+        });
+    });
+    
+})
+
 // Job view
 app.get('/job-:id', (req, res)=>{
-    res.send("Job #" + req.params.id);
-})
 
-// Filtered view
-app.post('/filter-view', (req, res)=>{
-
+    console.log(ObjectId(req.params.id));
     
-    res.send(req.body);
+    MongoClient.connect(connect.uri, (err, db) => {
+        db.collection('jobs.company').find({  "jobs" :  { $exists: true }  }).toArray(  (err, data) =>  {
+        // Itération super-compliquée sur les sous-documents....
+        // Il y a sûrement une méthode plus simple...
+            if(err){
+                console.log("Error: " + err);
+                }
+            else{
+                data.forEach(element => {
+                    element.jobs.forEach( elem =>{
+                        if(  JSON.stringify(elem._id) === JSON.stringify(req.params.id) ){
+                            console.log("Match job id: " + JSON.stringify( elem._id ) );
+                            res.send("Job #" + req.params.id +"<br><br> Company: " +  element.name + "<br> Position:"+ elem.position +"<br> Salary:"+ elem.salary +"<br> Experience level:" + elem.experience);
+                        } 
+                    })
+                });
+            }  
+        })
+    })
 })
 
 
-// Main view    [optional 'msg' param (duplicate error, void name, ...)]
+
+// MAIN VIEW    [optional 'msg' param (duplicate error, void name, ...)]
 app.get('/:msg?', (req, res)=>{
     if(req.params.msg){console.log(req.params.msg)}
     MongoClient.connect(connect.uri, (err, db) => {
@@ -101,9 +130,10 @@ app.post('/newjob', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
 
         db.collection('jobs.company').update({ name: req.body.company}, {$push: {jobs: {
-            position :  req.body.jobName,
-            salary:     req.body.salary,
-            experience: req.body.experience}
+            _id        :  new ObjectId(),
+            position   :  req.body.jobName,
+            salary     :  req.body.salary,
+            experience :  req.body.experience}
             }
         });
         console.log('CREATE - ' +JSON.stringify(req.body)   );

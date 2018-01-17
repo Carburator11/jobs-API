@@ -6,7 +6,7 @@
           <title>Jobs</title>
           <meta http-equiv="Cache-control" content="public">
           <meta name="viewport" content="width=device-width, user-scalable=no">
-
+          <link href='../css/style.css' rel='stylesheet'>
         
         </head>
         <h1>Jobs DB</h1>
@@ -16,9 +16,20 @@
  
         <% jobs.forEach( (elem) => { %>
           <% if(elem.name){ %>  
-            <div><%- JSON.stringify(elem.name)%> : <%- JSON.stringify(elem.jobs) %>
-            [<a href= "del/<%- elem._id %>" >x</a>]
+            <div class="companyDiv">
+              <%- JSON.stringify(elem.name).replace(/"/g, '')%> [<a href= "del/<%- elem._id %>" onclick="confirm('This will delete this entry. Are you sure?')">x</a>]
             </div>
+                  <% elem.jobs.forEach( (el) => { %>
+                      <div class="jobDiv">
+                        <%- JSON.stringify(el.position).replace(/"/g, '') %>
+                        (<%- JSON.stringify(el.experience).replace(/"/g, '') %>), 
+                        salary: <%- JSON.stringify(el.salary).replace(/"/g, '') %> k€
+                        [<a href= "job-<%- el._id %>" </a>link</a>]
+                      </div>
+                  <% })  %>
+
+            
+            
             <% }  %>
           
         <% }) %>
@@ -28,14 +39,17 @@
             <form method="POST" action="/filter-view">
                 <b> Company </b>  <br>
                   <!-- Filter 0 (company)  -->
-                  <select name="f0" id="company" multiple>
-                      <option value="null" selected hidden disabled >Add filter</option>
-                    <option value="">comp 1</option>
-                    <option value="">comp 1</option>
-                    <option value="">comp 1</option>
-                    <option value="">comp 1</option>
-                    <option value="">comp 1</option>
-                    <option value="">comp 1</option>
+                  <select name="f0" id="company" >
+                    <option value="null" selected hidden disabled >Add filter</option>
+                    <option value="Test">Test</option>
+                    <% jobs.forEach( (job) => { %>
+                      <% if(job.name){ %>  
+                        <option value = <%- JSON.stringify(job.name) %> >
+                            <%- JSON.stringify(job.name).replace(/"/g, '') %>
+                        </option>              
+                        <% }  %>
+                      
+                    <% }) %>
                   </select><br><br>
                 
 
@@ -43,23 +57,23 @@
                   <!-- Filter 1 (exp)  -->
                   <input type="checkbox" name="f1" value="junior">
                   <label for="junior">Junior</label><br>
-                  <input type="checkbox" name="confirmed" value="confirmed">
+                  <input type="checkbox" name="f1" value="confirmed">
                   <label for="confirmed">Confirmed</label><br>
-                  <input type="checkbox" name="senior" value="senior">
+                  <input type="checkbox" name="f1" value="senior">
                   <label for="senior">Senior</label><br>
-                  <input type="checkbox" name="overlord" value="overlord">
+                  <input type="checkbox" name="f1" value="overlord">
                   <label for="overlord">Overlord</label><br><br>
                 
 
                 <b>Salary</b><br>
                 <!-- Filter 2 (salary)  -->
-                <input type="checkbox" name="f2" value="sal0">
+                <input type="checkbox" name="f2a" value="sal0">
                 <label for="sal0"> < 30 </label><br>
-                <input type="checkbox" name="f2" value="sal1">
+                <input type="checkbox" name="f2b" value="sal1">
                 <label for="sal1"> 30 - 45 </label><br>
-                <input type="checkbox" name="f2" value="sal2">
+                <input type="checkbox" name="f2c" value="sal2">
                 <label for="sal2"> 45 - 65 </label><br>
-                <input type="checkbox" name="f2" value="sal3">
+                <input type="checkbox" name="f2d" value="sal3">
                 <label for="sal3"> > 70</label><br><br>
                 <div>
                   <button type="submit">Filter</button>
@@ -98,7 +112,7 @@
                 <% jobs.forEach( (job) => { %>
                   <% if(job.name){ %>  
                     <option value = <%- JSON.stringify(job.name) %> >
-                        <%- JSON.stringify(job.name) %>
+                        <%- JSON.stringify(job.name).replace(/"/g, '') %>
                     </option>              
                     <% }  %>
                   
@@ -112,7 +126,7 @@
               <option value="junior">Junior (0-2)</option>
               <option value="confirmed">Confirmed (2-5)</option>
               <option value="senior">Senior (>5)</option>
-              <option value="overlord">Overlord (>10></option>
+              <option value="overlord">Overlord (>10)</option>
 
             </select> 
             <input type="submit" value="Insert">
@@ -126,69 +140,6 @@
         End
 
 <style>
-  #jobsDB {
-    vertical-align: top;
-    border: 1px solid green;
-    overflow-Y: scroll;
-    height: 400px;
-    width: 75%;
-    display: inline-block;
-    padding: 5px;
-  }
-
-  #filtersDB{
-    vertical-align: top;
-    border: 1px solid green;
-    height: 400px;
-    width: 15%;
-    display: inline-block;
-    margin-left: 10px;
-    padding: 5px 20px;
-  }
-
-  select{padding: 2px;}
-  option{margin: 2px}
-
-
-  .errorMsg{
-    color: red;
-    font-size: 14px;
-    font-weight: bold;
-    font-style: italic;
-
-    animation: fade 0.5s 1;
-    -webkit-animation: fade 0.5s 1;
-    animation-fill-mode: forwards;
-
-    animation-delay:6s;
-    -webkit-animation-delay:1s; /* Safari and Chrome */
-    -webkit-animation-fill-mode: forwards;
-
-}
-.okMsg{
-    color: green;
-    font-size: 14px;
-    font-weight: bold;
-    font-style: italic;
-
-    animation: fade 0.5s 1;
-    -webkit-animation: fade 0.5s 1;
-    animation-fill-mode: forwards;
-
-    animation-delay:6s;
-    -webkit-animation-delay:1s; /* Safari and Chrome */
-    -webkit-animation-fill-mode: forwards;
-}
-
-@keyframes  fade{
-    from {opacity :1;}
-    to {opacity :0;}
-}
-
-@-webkit-keyframes  fade{
-    from {opacity :1;}
-    to {opacity :0;}
-}
 
 
 </style>
