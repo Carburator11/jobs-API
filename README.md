@@ -8,6 +8,7 @@ Deployed on:  [Heroku](https://jobsapi-carb11.herokuapp.com/)
 
 
 **19/01/2018**
+- création de fiches aléatoires
 - filtrage combiné OK
 
 **TO DO:**
