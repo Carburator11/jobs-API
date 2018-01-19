@@ -27,11 +27,20 @@ app.use(function(req, res, next) {
 app.set('port', (process.env.PORT || 5000));
 
 
-// A raw view of the DB
-app.get('/raw', (req, res)=>{
+// RAW jobs view 
+app.get('/rawjob', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
         console.log("Connecting");
-        assert.equal(null, err);
+        db.collection('jobs.jobs').find().toArray(  (err, data) =>  {
+            res.json(data);
+        });
+    });
+});
+
+// RAW company view 
+app.get('/rawcomp', (req, res)=>{
+    MongoClient.connect(connect.uri, (err, db) => {
+        console.log("Connecting");
         db.collection('jobs.company').find().toArray(  (err, data) =>  {
             res.json(data);
         });
@@ -41,53 +50,102 @@ app.get('/raw', (req, res)=>{
 
 // FILTERED VIEW
 app.post('/filter-view', (req, res)=>{
-    MongoClient.connect(connect.uri, (err, db) => {
-        console.log("Connecting");
-        assert.equal(null, err);
-        db.collection('jobs.company').find({name: req.body.f0}).toArray(  (err, data) =>  {            
-            res.render('front-filter.ejs', {jobs : data });
-        });
-    });
+     
+    if( !req.body.f0 && !req.body.f1 && !req.body.f2 )
+        {  
+            console.log("no filter");
+            res.redirect(303, '/err100');
+        }
+
+    else if(req.body.f0 && !req.body.f1 && !req.body.f2 )
+        { 
+            console.log("Filter by company only");
+            MongoClient.connect(connect.uri, (err, db) => {
+                if(err){
+                    res.send(err) 
+                    }
+                else {
+                    db.collection('jobs.company').find({name: req.body.f0}).toArray(  (err, data) =>  {
+                        res.render('front-filter.ejs', {jobs : data });
+                    });
+                }
+            })
+        }
+
+    else if(!req.body.f0 && (req.body.f1 || req.body.f2) )
+        {
+            console.log("filter only by exp or salary");
+            MongoClient.connect(connect.uri, (err, db) => {
+                if(err){
+                    res.send(err) 
+                    }
+                else {
+                    db.collection('jobs.company').find({ "jobs.salary" : {  $gte: 50 } }).toArray(  (err, data) =>  {
+                        
+                        data.jobs.forEach( (elem)=> {
+                            
+
+                        })
+                        res.render('front-filter.ejs', {jobs : data });
+                    });
+                }
+            })
+        }
+
+    else if(req.body.f0 && (req.body.f1 || req.body.f2) )
+        {
+            console.log("filter by company AND exp or salary");
+            res.send("filter by company AND exp or salary");
+        }
+              
+            
+
     
-})
+});
+
 
 // Job view
-app.get('/job-:id', (req, res)=>{
-
-    console.log(ObjectId(req.params.id));
-    
+app.get('/job-:id', (req, res)=>{ 
+    console.log('Job informations....');
     MongoClient.connect(connect.uri, (err, db) => {
-        db.collection('jobs.company').find({  "jobs" :  { $exists: true }  }).toArray(  (err, data) =>  {
-        // Itération super-compliquée sur les sous-documents....
-        // Il y a sûrement une méthode plus simple...
+        db.collection('jobs.jobs').findOne({"_id":  ObjectId(req.params.id)  }, (err, data) =>  {
             if(err){
-                console.log("Error: " + err);
+                res.send(err);
                 }
-            else{
-                data.forEach(element => {
-                    element.jobs.forEach( elem =>{
-                        if(  JSON.stringify(elem._id) === JSON.stringify(req.params.id) ){
-                            console.log("Match job id: " + JSON.stringify( elem._id ) );
-                            res.send("Job #" + req.params.id +"<br><br> Company: " +  element.name + "<br> Position:"+ elem.position +"<br> Salary:"+ elem.salary +"<br> Experience level:" + elem.experience);
-                        } 
-                    })
-                });
-            }  
+            else if(data){
+                res.send("Job #"            + req.params.id 
+                    +  "<br><br> Company: " + data.company
+                    +  "<br> Position:"     + data.position
+                    +  "<br> Salary:"       + data.salary
+                    +  "<br> Experience level:" + data.experience);
+                }
+            else {res.send("Found no job matching ID " + req.params.id )}
         })
-    })
-})
+    })    
+});
 
 
 
-// MAIN VIEW    [optional 'msg' param (duplicate error, void name, ...)]
+// MAIN VIEW    [optional 'msg' param (duplicate error, void name, no filter...)]
 app.get('/:msg?', (req, res)=>{
-    if(req.params.msg){console.log(req.params.msg)}
+    if(req.params.msg){
+        console.log(req.params.msg)
+    }
     MongoClient.connect(connect.uri, (err, db) => {
         console.log("Connecting");
-        assert.equal(null, err);
-        db.collection('jobs.company').find().toArray(  (err, data) =>  {
-            res.render('front.ejs', {jobs : data, test: {this: "is a test"}, msg: req.params.msg });
-        }  );
+        db.collection('jobs.jobs').find().toArray(  (error, jobs) =>  {
+            if(error){
+                res.send(error);
+            }
+            db.collection('jobs.company').find().toArray( (err, companies) => {
+                if(err){
+                    res.send(err);
+                }
+                else{
+                    res.render('front.ejs', {jobs : jobs, companies: companies, test: {this: "is a test"}, msg: req.params.msg });
+                }
+            })          
+        });
     });
 });
 
@@ -105,12 +163,12 @@ app.post('/newcompany', (req, res)=>{
     
     else{
         MongoClient.connect(connect.uri, (err, db) => {
-            db.collection('jobs.company').find({'name': req.body.company }).toArray(function (err, items) {
+            db.collection('jobs.company').find({ name: req.body.company  }).toArray(function (err, items) {
                 
                 // Check if company exists already
                 if(!items[0]){ 
                     console.log("CREATE completed - " + JSON.stringify(req.body.company)  )
-                    db.collection('jobs.company').insert({ name: req.body.company, jobs: [] });
+                    db.collection('jobs.company').insert({ name: req.body.company });
                     res.redirect(303, '/newCompAdded');
                     }
                 
@@ -128,26 +186,23 @@ app.post('/newcompany', (req, res)=>{
 // Create new job
 app.post('/newjob', (req, res)=>{
     MongoClient.connect(connect.uri, (err, db) => {
-
-        db.collection('jobs.company').update({ name: req.body.company}, {$push: {jobs: {
-            _id        :  new ObjectId(),
-            position   :  req.body.jobName,
-            salary     :  req.body.salary,
-            experience :  req.body.experience}
-            }
-        });
+        db.collection('jobs.jobs').insert(
+            {      
+                _id        :  new ObjectId(),
+                company    :  req.body.company,
+                position   :  req.body.jobName,
+                salary     :  parseInt(req.body.salary),
+                experience :  req.body.experience
+            });
+        
         console.log('CREATE - ' +JSON.stringify(req.body)   );
         res.redirect(303, '/');
     });
 });
 
 
-
-
-
-
 // This should be a DELETE request, but easier to test with GET..
-app.get('/del/:id', (req, res)=>{
+app.get('/delcomp/:id', (req, res)=>{
     console.log("DELETE "+ req.params.id);
     MongoClient.connect(connect.uri, (err, db) => {
         // Note: always add ObjectId in the deleteOne filter

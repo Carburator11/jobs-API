@@ -12,40 +12,38 @@
         <h1>Jobs DB</h1>
 
         <h3>Full DB</h3>
-        <div id= "jobsDB">
- 
-        <% jobs.forEach( (elem) => { %>
-          <% if(elem.name){ %>  
-            <div class="companyDiv">
-              <%- JSON.stringify(elem.name).replace(/"/g, '')%> [<a href= "del/<%- elem._id %>" onclick="confirm('This will delete this entry. Are you sure?')">x</a>]
-            </div>
-                  <% elem.jobs.forEach( (el) => { %>
-                      <div class="jobDiv">
-                        <%- JSON.stringify(el.position).replace(/"/g, '') %>
-                        (<%- JSON.stringify(el.experience).replace(/"/g, '') %>), 
-                        salary: <%- JSON.stringify(el.salary).replace(/"/g, '') %> k€
-                        [<a href= "job-<%- el._id %>" </a>link</a>]
-                      </div>
+        <div id= "jobsDB">       
+            <% companies.forEach( (company) => { %>
+              <div class="companyDiv">
+                  <!-- Company name -->
+                  <%- JSON.stringify(company.name).replace(/"/g, '') %>
+                  [<a href="#"   onclick=  "  { if(confirm('This will delete this entry. Are you sure?')){ window.open( 'delcomp/<%- company._id %>', '_self' )    }  }">x</a>]
+              </div>
+                  <% jobs.forEach( (job) => { %>
+                      <% if(company.name === job.company){   %> 
+                          <!-- Job name -->
+                          <div class="jobDiv">
+                              <%- JSON.stringify(job.position).replace(/"/g, '') %>, 
+                              <%- JSON.stringify(job.experience).replace(/"/g, '') %>
+                              (<%- JSON.stringify(job.salary).replace(/"/g, '') %>) k€
+                              [<a href= "job-<%- job._id %>" </a>link</a>]
+                          </div>
+                      <% } %>
                   <% })  %>
+          <% })  %>
 
-            
-            
-            <% }  %>
-          
-        <% }) %>
-        </div>
+                          </div>
 
         <div id="filtersDB">
             <form method="POST" action="/filter-view">
                 <b> Company </b>  <br>
                   <!-- Filter 0 (company)  -->
                   <select name="f0" id="company" >
-                    <option value="null" selected hidden disabled >Add filter</option>
-                    <option value="Test">Test</option>
-                    <% jobs.forEach( (job) => { %>
-                      <% if(job.name){ %>  
-                        <option value = <%- JSON.stringify(job.name) %> >
-                            <%- JSON.stringify(job.name).replace(/"/g, '') %>
+                    <option value="null" selected disabled >All</option>
+                    <% companies.forEach( (company) => { %>
+                      <% if(company.name){ %>  
+                        <option value = <%- JSON.stringify(company.name) %> >
+                            <%- JSON.stringify(company.name).replace(/"/g, '') %>
                         </option>              
                         <% }  %>
                       
@@ -67,16 +65,19 @@
 
                 <b>Salary</b><br>
                 <!-- Filter 2 (salary)  -->
-                <input type="checkbox" name="f2a" value="sal0">
+                <input type="checkbox" name="f2" value="sal0">
                 <label for="sal0"> < 30 </label><br>
-                <input type="checkbox" name="f2b" value="sal1">
+                <input type="checkbox" name="f2" value="sal1">
                 <label for="sal1"> 30 - 45 </label><br>
-                <input type="checkbox" name="f2c" value="sal2">
-                <label for="sal2"> 45 - 65 </label><br>
-                <input type="checkbox" name="f2d" value="sal3">
+                <input type="checkbox" name="f2" value="sal2">
+                <label for="sal2"> 45 - 70 </label><br>
+                <input type="checkbox" name="f2" value="sal3">
                 <label for="sal3"> > 70</label><br><br>
                 <div>
                   <button type="submit">Filter</button>
+                  <% if(msg === "err100"){ %>
+                    <div class="errorMsg">No filter</div>
+                    <% } %>
                 </div>
               </form>
 
@@ -108,11 +109,10 @@
         <form action="/newjob" method="POST">
             <select name="company" id="company">
                 <option value="aa" selected hidden disabled >Select company</option>
-                <option value="test">Test</option>
-                <% jobs.forEach( (job) => { %>
-                  <% if(job.name){ %>  
-                    <option value = <%- JSON.stringify(job.name) %> >
-                        <%- JSON.stringify(job.name).replace(/"/g, '') %>
+                <% companies.forEach( (company) => { %>
+                  <% if(company.name){ %>  
+                    <option value = <%- JSON.stringify(company.name) %> >
+                        <%- JSON.stringify(company.name).replace(/"/g, '') %>
                     </option>              
                     <% }  %>
                   
@@ -120,7 +120,7 @@
                 
             </select>
             <input type="text" name="jobName" placeholder="Job name" >
-            <input type="text" name="salary"  placeholder="Salary" >
+            <input type="number" name="salary"  placeholder="Salary" >
             <select name="experience">
               <option value="aa" selected hidden disabled >Experience level</option>
               <option value="junior">Junior (0-2)</option>
