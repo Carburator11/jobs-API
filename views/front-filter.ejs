@@ -14,31 +14,7 @@
 
 <h3>Filtered DB (<a href="/">reset</a>)</h3>
 <div id= "jobsDB">
-
-    <% jobs.forEach( (elem) => { %>
-      <% if(elem.name){ %>  
-        <div class="companyDiv">
-          <%- JSON.stringify(elem.name).replace(/"/g, '')%>
-        </div>
-              <% elem.jobs.forEach( (el) => { %>
-                  <div class="jobDiv">
-                    <%- JSON.stringify(el.position).replace(/"/g, '') %>
-                    (<%- JSON.stringify(el.experience).replace(/"/g, '') %>), 
-                    salary: <%- JSON.stringify(el.salary).replace(/"/g, '') %> k€
-                    [<a href= "job-<%- el._id %>" </a>link</a>]
-                  </div>
-              <% })  %>
-
-        
-        
-        <% }  %>
-      
-    <% }) %>
-    </div>
-
-    
-
-
+    <%- JSON.stringify(jobs) %>
     </div>
 </body>
 

@@ -39,7 +39,7 @@
                 <b> Company </b>  <br>
                   <!-- Filter 0 (company)  -->
                   <select name="f0" id="company" >
-                    <option value="null" selected disabled >All</option>
+                    <option value="null" selected >All</option>
                     <% companies.forEach( (company) => { %>
                       <% if(company.name){ %>  
                         <option value = <%- JSON.stringify(company.name) %> >
@@ -53,25 +53,25 @@
 
                 <b>Experience</b><br>
                   <!-- Filter 1 (exp)  -->
-                  <input type="checkbox" name="f1" value="junior">
+                  <input type="radio" name="f1" value="junior">
                   <label for="junior">Junior</label><br>
-                  <input type="checkbox" name="f1" value="confirmed">
+                  <input type="radio" name="f1" value="confirmed">
                   <label for="confirmed">Confirmed</label><br>
-                  <input type="checkbox" name="f1" value="senior">
+                  <input type="radio" name="f1" value="senior">
                   <label for="senior">Senior</label><br>
-                  <input type="checkbox" name="f1" value="overlord">
+                  <input type="radio" name="f1" value="overlord">
                   <label for="overlord">Overlord</label><br><br>
                 
 
                 <b>Salary</b><br>
                 <!-- Filter 2 (salary)  -->
-                <input type="checkbox" name="f2" value="sal0">
+                <input type="radio" name="f2" value="sal0">
                 <label for="sal0"> < 30 </label><br>
-                <input type="checkbox" name="f2" value="sal1">
+                <input type="radio" name="f2" value="sal1">
                 <label for="sal1"> 30 - 45 </label><br>
-                <input type="checkbox" name="f2" value="sal2">
+                <input type="radio" name="f2" value="sal2">
                 <label for="sal2"> 45 - 70 </label><br>
-                <input type="checkbox" name="f2" value="sal3">
+                <input type="radio" name="f2" value="sal3">
                 <label for="sal3"> > 70</label><br><br>
                 <div>
                   <button type="submit">Filter</button>
