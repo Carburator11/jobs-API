@@ -26,6 +26,43 @@ app.use(function(req, res, next) {
 });
 app.set('port', (process.env.PORT || 5000));
 
+// Random new job
+app.get('/randomjob', (req, res) => {
+    
+    let promise = new Promise((resolve, reject) =>{
+        MongoClient.connect(connect.uri, (err, db) => {
+            db.collection('jobs.company').find().toArray((err, data)=>{
+                let array = [];
+                data.forEach( (element) =>{ array.push(element.name) } )
+                resolve(array);
+            })
+        });
+    });
+
+    let promise2 = new Promise((resolve, reject) =>{
+        MongoClient.connect(connect.uri, (err, db) => {
+            db.collection('jobs.jobs').find().toArray((err, data)=>{
+                let array = [];
+                data.forEach( (element) =>{
+                    array.forEach( el => {
+                        if(el === element.position)
+                    })
+                    array.push(element.position)
+                } )
+                resolve(array);
+            })
+        });
+    });
+    
+        
+    promise.then((data, error) => {
+        promise2.then((data2, error2)=>{
+            res.send(JSON.stringify(data) + "<br>" + JSON.stringify(data2)  );    
+        })
+        
+    })
+ 
+});
 
 // RAW jobs view 
 app.get('/rawjob', (req, res)=>{
@@ -73,7 +110,7 @@ app.post('/filter-view', (req, res)=>{
             })
         }
     
-    // Filter ONLY by exp or salary
+    // OK : Filter ONLY by exp or salary
     else if( (req.body.f0 === "null") && (req.body.f1 || req.body.f2) )
         {
             console.log("Filter only by exp or salary");
@@ -116,10 +153,47 @@ app.post('/filter-view', (req, res)=>{
         })
     }
 
+    // OK : Filter by Company AND by exp or salary
     else if(req.body.f0 && (req.body.f1 || req.body.f2) )
         {
-            console.log("filter by company AND exp or salary");
-            res.send("filter by company AND exp or salary");
+            console.log("filter by company AND exp or salary" + JSON.stringify(req.body));
+                        // A REFACTORISER++
+                        MongoClient.connect(connect.uri, (err, db) => {
+                            if(err){
+                                res.send(err) 
+                                }
+                            else {
+                                if(!req.body.f2){
+                                    db.collection('jobs.jobs').find({ company: req.body.f0 , experience: req.body.f1}).toArray(  (err, data) =>  {
+                                            res.render('front-filter.ejs', {jobs : data });   
+                                    })                 
+                                }
+                                else if(req.body.f2 === "sal0"){
+                                    db.collection('jobs.jobs').find({ company: req.body.f0, experience: req.body.f1, salary :  { $gt: 0, $lte: 30  }}).toArray(  (err, data) =>  {
+                                        res.render('front-filter.ejs', {jobs : data });   
+                                    })  
+                                }
+                                else if(req.body.f2 === "sal1"){
+                                    db.collection('jobs.jobs').find({ company: req.body.f0, experience: req.body.f1, salary :  { $gt: 30, $lte: 45  }}).toArray(  (err, data) =>  {
+                                        res.render('front-filter.ejs', {jobs : data });   
+                                    })                       
+                                }
+                                else if(req.body.f2 === "sal2"){
+                                    db.collection('jobs.jobs').find({ company: req.body.f0, experience: req.body.f1, salary :  { $gt: 45, $lte: 70  }}).toArray(  (err, data) =>  {
+                                        res.render('front-filter.ejs', {jobs : data });   
+                                    })                       
+                                }
+                                else if(req.body.f2 === "sal3"){
+                                    db.collection('jobs.jobs').find({ company: req.body.f0, experience: req.body.f1, salary :  { $gt: 70  }}).toArray(  (err, data) =>  {
+                                        res.render('front-filter.ejs', {jobs : data });   
+                                    })
+                                }    
+                                else{
+                                    res.send("Error, please re-query <br><a href='/'  > &#8592; back </a>");    
+                                }
+                                
+                            }
+                    })
         }
               
             
@@ -224,6 +298,7 @@ app.post('/newjob', (req, res)=>{
         res.redirect(303, '/');
     });
 });
+
 
 
 // These should be DELETE requests, but easier to test with GET..
