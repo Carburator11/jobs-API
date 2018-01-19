@@ -45,7 +45,9 @@ app.get('/randomjob', (req, res) => {
                 let array = [];
                 data.forEach( (element) =>{
                     array.forEach( el => {
-                        if(el === element.position)
+                        if(el === element.position){
+                            // DO something
+                        }
                     })
                     array.push(element.position)
                 } )
